@@ -1,0 +1,9 @@
+[mod]
+name="Recover Loot"
+id="recover-loot"
+version="1.0.0"
+priority=0
+[autoload]
+RecoverLootMain="res://mods/RecoverLoot/Main.gd"
+[updates]
+modworkshop=56038
