@@ -87,10 +87,7 @@ func _is_on_map() -> bool:
 	return map_node != null and not gameData.isDead
 
 
-# ═══════════════════════════════════════════════════════════════════
 #  CAPTURE — serialize player inventory at moment of death
-# ═══════════════════════════════════════════════════════════════════
-
 func _capture_stash():
 	var interface = _get_interface()
 	if not is_instance_valid(interface):
@@ -142,10 +139,7 @@ func _capture_stash():
 		print("[RecoverLoot] Stashed %d items on %s" % [idx, gameData.currentMap])
 
 
-# ═══════════════════════════════════════════════════════════════════
 #  SPAWN — create Pickups at death location
-# ═══════════════════════════════════════════════════════════════════
-
 func _has_stash() -> bool:
 	return FileAccess.file_exists(STASH_PATH)
 
@@ -229,10 +223,7 @@ func _try_spawn_stash():
 		print("[RecoverLoot] %d items spawned at your death location" % spawned)
 
 
-# ═══════════════════════════════════════════════════════════════════
 #  SERIALIZATION
-# ═══════════════════════════════════════════════════════════════════
-
 func _serialize_slot(cfg: ConfigFile, section: String, slot):
 	if slot == null or slot.itemData == null:
 		return
@@ -297,10 +288,7 @@ func _load_item_data(file_name: String, fallback_res_path: String = ""):
 	return null
 
 
-# ═══════════════════════════════════════════════════════════════════
 #  STASH FILE MANAGEMENT
-# ═══════════════════════════════════════════════════════════════════
-
 func _delete_stash():
 	if FileAccess.file_exists(STASH_PATH):
 		DirAccess.remove_absolute(STASH_PATH)
@@ -315,10 +303,7 @@ func _get_interface():
 	return get_node_or_null("/root/Map/Core/UI/Interface")
 
 
-# ═══════════════════════════════════════════════════════════════════
 #  MCM
-# ═══════════════════════════════════════════════════════════════════
-
 func _try_load_mcm():
 	if ResourceLoader.exists("res://ModConfigurationMenu/Scripts/Doink Oink/MCM_Helpers.tres"):
 		return load("res://ModConfigurationMenu/Scripts/Doink Oink/MCM_Helpers.tres")
