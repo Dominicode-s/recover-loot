@@ -1,11 +1,9 @@
 extends Node
 
-# Recover Loot — Pure autoload, no script overrides
+# Recover Loot: pure autoload, no script overrides
 # Saves inventory + equipment on death, spawns as Pickups on return.
 
 var gameData = preload("res://Resources/GameData.tres")
-
-# ─── Paths ───
 
 const STASH_PATH = "user://RecoverLoot.cfg"
 const MARKER_PATH = "user://RecoverLootMarker.tres"
@@ -13,12 +11,8 @@ const MCM_MOD_ID = "RecoverLoot"
 const MCM_FILE_PATH = "user://ModConfigs/recover-loot"
 const LOCAL_CFG_PATH = "user://RecoverLoot_settings.cfg"
 
-# ─── MCM Config ───
-
 var cfg_enabled: bool = true
 var cfg_show_hint: bool = true
-
-# ─── State Tracking ───
 
 var _prev_dead: bool = false
 var _prev_menu: bool = true
@@ -26,8 +20,6 @@ var _prev_on_map: bool = false
 var _stash_checked: bool = false
 var _spawn_timer: float = -1.0
 var _mcm_helpers = null
-
-# ─── Lifecycle ───
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -39,7 +31,7 @@ func _ready():
 	_ensure_marker()
 
 func _process(delta):
-	# ─── New-game detection (.tres marker wiped by FormatSave) ───
+	# New game: .tres marker gets wiped by FormatSave
 	if _prev_menu and not gameData.menu:
 		if not FileAccess.file_exists(MARKER_PATH):
 			_delete_stash()
@@ -50,13 +42,12 @@ func _process(delta):
 		_prev_dead = gameData.isDead
 		return
 
-	# ─── Death detection: capture stash (deferred to avoid death-frame issues) ───
+	# Deferred to avoid death-frame issues
 	if gameData.isDead and not _prev_dead:
 		if not gameData.permadeath and not gameData.tutorial:
 			call_deferred("_capture_stash")
 	_prev_dead = gameData.isDead
 
-	# ─── Map entry detection: schedule stash spawn ───
 	var on_map = _is_on_map()
 
 	if on_map and not _prev_on_map:
@@ -87,7 +78,7 @@ func _is_on_map() -> bool:
 	return map_node != null and not gameData.isDead
 
 
-#  CAPTURE — serialize player inventory at moment of death
+# Capture
 func _capture_stash():
 	var interface = _get_interface()
 	if not is_instance_valid(interface):
@@ -102,7 +93,6 @@ func _capture_stash():
 
 	var idx = 0
 
-	# Inventory items
 	var inv_grid = interface.get("inventoryGrid")
 	if is_instance_valid(inv_grid):
 		for item in inv_grid.get_children():
@@ -113,7 +103,6 @@ func _capture_stash():
 				_serialize_slot(cfg, "item_%d" % idx, sd)
 				idx += 1
 
-	# Equipment items
 	var equip = interface.get("equipment")
 	if is_instance_valid(equip):
 		for slot_node in equip.get_children():
@@ -139,7 +128,7 @@ func _capture_stash():
 		print("[RecoverLoot] Stashed %d items on %s" % [idx, gameData.currentMap])
 
 
-#  SPAWN — create Pickups at death location
+# Spawn
 func _has_stash() -> bool:
 	return FileAccess.file_exists(STASH_PATH)
 
@@ -191,7 +180,7 @@ func _try_spawn_stash():
 			if cash_mod and file == "Cash" and cash_mod.cash_pickup_scene:
 				item_scene = cash_mod.cash_pickup_scene
 		if item_scene == null:
-			print("[RecoverLoot] Unknown item '%s' — skipped" % file)
+			print("[RecoverLoot] Unknown item '%s', skipped" % file)
 			continue
 
 		var pickup = item_scene.instantiate()
@@ -223,7 +212,7 @@ func _try_spawn_stash():
 		print("[RecoverLoot] %d items spawned at your death location" % spawned)
 
 
-#  SERIALIZATION
+# Serialization
 func _serialize_slot(cfg: ConfigFile, section: String, slot):
 	if slot == null or slot.itemData == null:
 		return
@@ -288,7 +277,7 @@ func _load_item_data(file_name: String, fallback_res_path: String = ""):
 	return null
 
 
-#  STASH FILE MANAGEMENT
+# Stash file
 func _delete_stash():
 	if FileAccess.file_exists(STASH_PATH):
 		DirAccess.remove_absolute(STASH_PATH)
@@ -303,7 +292,7 @@ func _get_interface():
 	return get_node_or_null("/root/Map/Core/UI/Interface")
 
 
-#  MCM
+# MCM
 func _try_load_mcm():
 	if ResourceLoader.exists("res://ModConfigurationMenu/Scripts/Doink Oink/MCM_Helpers.tres"):
 		return load("res://ModConfigurationMenu/Scripts/Doink Oink/MCM_Helpers.tres")
